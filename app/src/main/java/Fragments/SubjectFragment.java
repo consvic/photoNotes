@@ -83,7 +83,7 @@ public class SubjectFragment extends Fragment {
     
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
     Metadatos metadatos;
-    String v_nombre,v_fecha;
+    String v_nombre, v_fecha;
     String horainit,horafin;
     ArrayList<Photo> photosPaths = new ArrayList<>();
 
@@ -208,7 +208,6 @@ public class SubjectFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         v_nombre="";
-                        v_fecha="";
                         if(!mSpinner.getSelectedItem().toString().equalsIgnoreCase("Choose a day")){
                             v_nombre=ed_nombre.getText().toString();
                             v_fecha = mSpinner.getSelectedItem().toString();
@@ -227,16 +226,20 @@ public class SubjectFragment extends Fragment {
                             //Materia materia = crud.selectMateria()
                             //TODO PEDIR PERMISO DE STORAGE...DESPUES MANDA LLAMAR A METADATOS
                             idCursando = crud.newCursando(new Cursando(0,user.getId_user(),id,"","",v_fecha,txt_from.getText().toString(),txt_to.getText().toString()));
-                            Log.d("DEBUG", v_fecha);
+                           // Log.d("datos: ", v_fecha + " " + horainit + " " + horafin);
+                            requestPermission();
+
+                           // ArrayList<Photo> pictures = metadatos.getAllShownImagesPath(getActivity(),v_fecha,txt_from.getText().toString(),txt_to.getText().toString());
+                            /*
+                            for(int i = 0; i<pictures.size();i++){
+                                crud.newPhoto(new Photo(0,idCursando,user.getId_user(),id,pictures.get(i).getPath(),pictures.get(i).getFecha()));
+                            }
+                            */
+
                             RecycleViewCustomAdapterCourses adapter = new RecycleViewCustomAdapterCourses(getActivity(),crud.getMaterias(), new Adapters.RecyclerViewClickListener() {
                                 @Override
                                 public void onClick(View view, int position) {
                                     Toast.makeText(getContext(),"Position: " +position, Toast.LENGTH_SHORT);
-                                    Intent inte = new Intent(getActivity(), ListPhotos.class);
-                                    Materia ma = crud.selectMateria(id);
-                                    inte.putExtra("idMateria",ma.getId_materia());
-                                    startActivity(inte);
-
                                 }
                             });
                             rvCourses.setAdapter(adapter);
@@ -244,7 +247,7 @@ public class SubjectFragment extends Fragment {
 
                             Log.d("ID:",id+"");
                             Toast.makeText(getActivity(),mSpinner.getSelectedItem().toString()+" "
-                                    + v_nombre+" "+v_fecha, Toast.LENGTH_SHORT).show();
+                                    + v_nombre, Toast.LENGTH_SHORT).show();
                             dialog.dismiss();
 
 
@@ -278,9 +281,7 @@ public class SubjectFragment extends Fragment {
             public void onClick(View view, int position) {
                 Toast.makeText(getContext(),"Position: " +position, Toast.LENGTH_SHORT);
                 Intent inte = new Intent(getActivity(), ListPhotos.class);
-                Materia ma = crud.selectMateria(id);
-                Materia aux = crud.getMaterias().get(position);
-                inte.putExtra("idMateria",aux.getId_materia());
+                inte.putExtra("idMateria",id);
                 startActivity(inte);
             }
         });
@@ -330,33 +331,28 @@ public class SubjectFragment extends Fragment {
 
      private void requestPermission() {
 
-        if(ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            //debemos mostrar un mensaje
-            if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                //mostramos una explicacind eque no acepto dar permiso para acceder a la libreria
+         if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+                 != PackageManager.PERMISSION_GRANTED) {
+             //debemos mostrar un mensaje
+             if(ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                     Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                 //mostramos una explicacind eque no acepto dar permiso para acceder a la libreria
 
-            } else  {
-                //pedimos permiso
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                        REQUEST_EXTERNAL_STORAGE);
+             } else  {
+                 //pedimos permiso
+                 ActivityCompat.requestPermissions(getActivity(),
+                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                         REQUEST_EXTERNAL_STORAGE);
 
-            }
-        } else {
+             }
+         } else {
             //TODO: AQUI LLAMA A LOS METADATOS Y REGRESA OBJETO FOTO CON PATHS Y FECHAS PARA LA MATERIA CREADA
-            Log.d("permiso", "no se pide");
-            /*
-            photosPaths= metadatos.getAllShownImagesPath(getActivity(),v_nombre,horainit,horafin);
-
-            for(int i = 0; i<photosPaths.size();i++){
+            //Log.d("permiso", "no se pide");
+            photosPaths= metadatos.getAllShownImagesPath(getActivity(),v_fecha,horainit,horafin);
+            /*for(int i = 0; i<photosPaths.size();i++){
                 Log.d("Path:" , photosPaths.get(i).getPath() +" " + photosPaths.get(i).getFecha());
                 //crud.newPhoto(new Photo(0,idCursando,user.getId_user(),id,photosPaths.get(i).getPath(),photosPaths.get(i).getFecha()));
-            }
-            */
-
-
+            }*/
         }
     }
 
@@ -367,21 +363,16 @@ public class SubjectFragment extends Fragment {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-
-                    Log.e("value", "Permission Granted, Now you can use local drive .");
+                   // Log.e("value", "Permission Granted, Now you can use local drive .");
                     //TODO: AQUI LLAMA A LOS METADATOS Y REGRESA OBJETO FOTO CON PATHS Y FECHAS PARA LA MATERIA CREADA
-                    Log.d("permiso", "no se pide");
-                    /*photosPaths=metadatos.getAllShownImagesPath(getActivity(),v_nombre,horainit,horafin);
-                    for(int i = 0; i<photosPaths.size();i++){
+                    //Log.d("permiso", "no se pide");
+                    photosPaths=metadatos.getAllShownImagesPath(getActivity(),v_fecha,horainit,horafin);
+                    /*for(int i = 0; i<photosPaths.size();i++){
                         Log.d("Path:" , photosPaths.get(i).getPath() +" " + photosPaths.get(i).getFecha());
                         //crud.newPhoto(new Photo(0,idCursando,user.getId_user(),id,photosPaths.get(i).getPath(),photosPaths.get(i).getFecha()));
-                    }
-                    */
-
-
+                    }*/
                 } else {
 
                     // permission denied, boo! Disable the
@@ -393,3 +384,4 @@ public class SubjectFragment extends Fragment {
     }
 
 }
+
